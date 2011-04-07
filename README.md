@@ -4,18 +4,17 @@ bash-emr
 This is a simple set of bash functions for manipulating a
 Amazon Elastic MapReduce clusters.
 
-This work is licensed under a [Creative Commons Attribution 3.0 Unported License] (http://creativecommons.org/licenses/by/3.0/).
+This work is licensed under a [Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/).
 
 Install
 -----
 
-You must install the Elastic MapReduce Ruby client
-http://aws.amazon.com/code/Elastic-MapReduce/2264
+You must install the [Elastic MapReduce Ruby client](http://aws.amazon.com/code/Elastic-MapReduce/2264).
 
 You then must set the EMR_HOME environment variable to the 
 ruby client install root directory.
 
-export EMR_HOME=/path/to/elastic-mapreduce-ruby
+    export EMR_HOME=/path/to/elastic-mapreduce-ruby
 
 Finally, you must source the setenv.sh file
 
@@ -25,15 +24,15 @@ Usage
 -----
 
 ### emr
-This is shorthand for calling from the shell:
-    elastic-mapreduce
+This is shorthand for calling from the shell.
+    emr <some commands>
 
 ### emrset
 When you start a flow on EMR, you will be given a flow id. 
-emrset will set the flow id for use by many of the other commands
+Use __emrset__ to set the flow id for use by many of the other commands
     emrset <flow id>
       
-Calling emrset without the id returs the current flow id.
+Calling __emrset__ without the id returns the current flow id.
 
 ### emrhost
 Will return the current master node on the EMR cluster.
@@ -42,7 +41,7 @@ Will return the current master node on the EMR cluster.
 Will remotely login to the master node. 
 
 ### emrstat
-Will return the current status of a give running flow.
+Will return the current status of a given running flow.
 
 ### emrterminate
 Will terminate your remote EMR cluster.
@@ -67,5 +66,5 @@ Will scp a given file to the remote master node.
     emrscp my-hadoop-app.jar
 
 This is useful if you leave your EMR cluster running and want to manually spawn 
-jobs from emrlogin or emrscreen.
+jobs from __emrlogin__ or __emrscreen__.
 
