@@ -2,7 +2,6 @@
 # 
 # you must set EMR_HOME to point to the root directory of your 'elastic-mapreduce-ruby' install
 #
-
 export PATH=$EMR_HOME:$PATH
 
 # EMR helpers
