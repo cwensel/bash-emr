@@ -4,9 +4,21 @@
 #
 export PATH=$EMR_HOME:$PATH
 
+[ -z "$EMR_CRED_JSON" ] && EMR_CRED_JSON=$EMR_HOME/credentials.json
+
+if [ ! -f $EMR_CRED_JSON ];then
+  echo "Credentias at $EMR_CRED_JSON do not exist!"
+else
+  echo "Using EMR credentials: $EMR_CRED_JSON"
+fi
+
 # EMR helpers
-KEYPAIR=`cat $EMR_HOME/credentials.json | grep key-pair-file | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
-export EMR_SSH_OPTS="-i "$KEYPAIR" -o StrictHostKeyChecking=no -o ServerAliveInterval=30"
+export EMR_SSH_KEY=`cat $EMR_CRED_JSON | grep key-pair-file | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+export EMR_SSH_KEY_NAME=`cat $EMR_CRED_JSON | grep key-pair | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+
+export EMR_SSH_OPTS="-i "$EMR_SSH_KEY" -o StrictHostKeyChecking=no -o ServerAliveInterval=30"
+
+export ELASTIC_MAPREDUCE_CREDENTIALS=$EMR_CRED_JSON
 
 function emr {
   RESULT=`elastic-mapreduce $*`
