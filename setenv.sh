@@ -90,6 +90,11 @@ function emrproxy {
  ssh $EMR_SSH_OPTS -D 6666 -N "hadoop@$HOST"
 }
 
+function emrlist {
+ FLOW_ID=`flowid $1`
+ emr -j $FLOW_ID --list
+}
+
 function emrstat {
  FLOW_ID=`flowid $1`
  emr -j $FLOW_ID --describe | grep 'LastStateChangeReason' | head -1 | cut -d":" -f2 | sed -n 's|^ "\([^\"]*\)".*|\1|p'
