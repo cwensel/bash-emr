@@ -11,28 +11,35 @@ Install
 
 You must install the [Elastic MapReduce Ruby client](http://aws.amazon.com/code/Elastic-MapReduce/2264).
 
-You then must set the EMR_HOME environment variable to the 
+You then must set the __EMR_HOME__ environment variable to the 
 ruby client install root directory.
 
     export EMR_HOME=/path/to/elastic-mapreduce-ruby
 
-Finally, you must source the setenv.sh file
+Finally, you must source the `setenv.sh` file
 
     . setenv.sh
+
+Setting __EMR_CRED_JSON__ will allow you to override the `credentials.json` file required by the elastic-mapreduce-ruby client.
 
 Usage
 -----
 
 ### emr
 This is shorthand for calling from the shell.
-    emr <some commands>
+    
+    emr <some args>
 
 ### emrset
 When you start a flow on EMR, you will be given a flow id. 
 Use __emrset__ to set the flow id for use by many of the other commands
+    
     emrset <flow id>
       
 Calling __emrset__ without the id returns the current flow id.
+
+### emrlist
+Will return all job flows created in the last 2 days
 
 ### emrhost
 Will return the current master node on the EMR cluster.
@@ -52,6 +59,7 @@ If a screen instance is already running, this command will automatically attach.
 
 ### emrtail
 Will automatically 'tail' the current flow step logs.
+    
     emrtail 2
 
 Without a step number, a list of available steps will be displayed.
@@ -63,6 +71,7 @@ work best.
 
 ### emrscp
 Will scp a given file to the remote master node.
+    
     emrscp my-hadoop-app.jar
 
 This is useful if you leave your EMR cluster running and want to manually spawn 
