@@ -77,3 +77,10 @@ Will scp a given file to the remote master node.
 This is useful if you leave your EMR cluster running and want to manually spawn 
 jobs from __emrlogin__ or __emrscreen__.
 
+### emrconf
+Will scp all `conf/*-site.xml` files from the master node into the given directory.
+    
+    emrconf local-conf
+
+This is useful if you leave your EMR cluster running on a AWS VPC and wish to run Hadoop jobs from a local shell.
+

@@ -91,13 +91,12 @@ function emrproxy {
 }
 
 function emrlist {
- FLOW_ID=`flowid $1`
- emr -j $FLOW_ID --list
+ emr --list
 }
 
 function emrstat {
  FLOW_ID=`flowid $1`
- emr -j $FLOW_ID --describe | grep 'LastStateChangeReason' | head -1 | cut -d":" -f2 | sed -n 's|^ "\([^\"]*\)".*|\1|p'
+ emr -j $FLOW_ID --describe | grep 'LastStateChangeReason' | sort -r | head -1 | cut -d":" -f2 | sed -n 's|^ "\([^\"]*\)".*|\1|p'
 }
 
 function emrterminate {
@@ -110,4 +109,23 @@ function emrscp {
  HOST=`emrhost`
  scp $EMR_SSH_OPTS $1 "hadoop@$HOST:"
 }
+
+function emrconf {
+  if [ -z "$1" ]; then
+    echo "Must provide target directory to place files!"
+    return
+  fi
+      
+  if [ $# == 2 ]; then
+    HH=$1
+    CONFPATH=$2
+  else
+    HH=""
+    CONFPATH=$1
+  fi   
+  HOST=`emrhost $HH`
+  scp $EMR_SSH_OPTS "hadoop@$HOST:conf/*-site.xml" $CONFPATH/
+}
+
+
 
