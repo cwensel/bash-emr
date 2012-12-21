@@ -13,8 +13,8 @@ else
 fi
 
 # EMR helpers
-export EMR_SSH_KEY=`cat $EMR_CRED_JSON | grep key-pair-file | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
-export EMR_SSH_KEY_NAME=`cat $EMR_CRED_JSON | grep key-pair | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+export EMR_SSH_KEY=`cat $EMR_CRED_JSON | grep '"key-pair-file"' | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+export EMR_SSH_KEY_NAME=`cat $EMR_CRED_JSON | grep '"key-pair"' | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
 
 export EMR_SSH_OPTS="-i "$EMR_SSH_KEY" -o StrictHostKeyChecking=no -o ServerAliveInterval=30"
 
@@ -49,7 +49,7 @@ function emrhost {
   FLOW_ID=`flowid $1`
   unset H
   while [ -z "$H" ]; do
-   H=`emr -j $FLOW_ID --describe | grep MasterPublicDnsName | sed -n 's|.*"\([^"]*.amazonaws.com\)".*|\1|p'`
+   H=`emr -j $FLOW_ID --describe | grep MasterPublicDnsName | sed -n 's|.*"\([^"]*\)".*|\1|p'`
    sleep 5
   done
   echo $H
