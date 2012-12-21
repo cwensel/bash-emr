@@ -86,7 +86,8 @@ function emrlogin {
  
 function emrproxy {
  HOST=`emrhost $1`
- echo http://$HOST:9100
+ echo "JobTracker: http://$HOST:9100"
+ echo "NameNode  : http://$HOST:9101"
  ssh $EMR_SSH_OPTS -D 6666 -N "hadoop@$HOST"
 }
 
