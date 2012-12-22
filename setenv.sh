@@ -46,6 +46,11 @@ function flowid {
 }
 
 function emrhost {
+  if [[ $1 =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
+   echo $1
+   return
+  fi
+    
   FLOW_ID=`flowid $1`
   unset H
   while [ -z "$H" ]; do

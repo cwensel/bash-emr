@@ -25,6 +25,31 @@ Setting __EMR_CRED_JSON__ will allow you to override the `credentials.json` file
 Usage
 -----
 
+To find an existing cluster:
+
+	emrlist
+	
+To attach to a cluster, using a _flow id_:
+
+    emrset <flow id>	
+
+To get the current _flow id_:
+
+	emrset
+
+To remotely login to the master node of the current _flow id_:
+
+	emrlogin
+	
+To remotely login with just the ip address:
+
+	emrlogin <ip address>	
+
+Note that most commands will take the _flow id_ or an _ip address_ to override the default _flow id_ set using `emrset`.
+
+Reference
+---------
+
 ### emr
 This is shorthand for calling from the shell.
     
