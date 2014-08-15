@@ -1,8 +1,9 @@
-
 # 
-# you must set EMR_HOME to point to the root directory of your 'elastic-mapreduce-ruby' install
+# you must have the AWS Universal CLI installed 
+# you must set EMR_HOME to point to the directory that has your credentials file
 #
 export PATH=$EMR_HOME:$PATH
+export AWS_DEFAULT_OUTPUT="table"
 
 [ -z "$EMR_CRED_JSON" ] && EMR_CRED_JSON=$EMR_HOME/credentials.json
 
@@ -21,7 +22,7 @@ export EMR_SSH_OPTS="-i "$EMR_SSH_KEY" -o StrictHostKeyChecking=no -o ServerAliv
 export ELASTIC_MAPREDUCE_CREDENTIALS=$EMR_CRED_JSON
 
 function emr {
-  RESULT=`elastic-mapreduce $*`
+  RESULT=`aws  emr $*`
   ID=`echo "$RESULT" | head -1 | sed -n 's|^Cr.*\(j-[^ ]*\)$|\1|p'`
   
   [ -n "$ID" ] && export EMR_FLOW_ID="$ID"
@@ -54,7 +55,7 @@ function emrhost {
   FLOW_ID=`flowid $1`
   unset H
   while [ -z "$H" ]; do
-   H=`emr -j $FLOW_ID --describe | grep MasterPublicDnsName | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+   H=`emr describe-cluster --cluster-id $FLOW_ID  --query [Cluster.MasterPublicDnsName] --output text`
    sleep 5
   done
   echo $H
@@ -91,23 +92,29 @@ function emrlogin {
  
 function emrproxy {
  HOST=`emrhost $1`
- echo "JobTracker: http://$HOST:9100"
+ echo "ResourceManager: http://$HOST:9026"
  echo "NameNode  : http://$HOST:9101"
+ echo "HUE  : http://$HOST:8080"
+ echo "PRESTO  : http://$HOST:8888"
  ssh $EMR_SSH_OPTS -D 6666 -N "hadoop@$HOST"
 }
 
 function emrlist {
- emr --list
+ emr list-clusters --query Clusters[*].[Id,Name,Status.State] 
+}
+
+function emractive {
+ emr list-clusters --query Clusters[*].[Id,Name,Status.State] --active 
 }
 
 function emrstat {
  FLOW_ID=`flowid $1`
- emr -j $FLOW_ID --describe | grep 'LastStateChangeReason' | sort -r | head -1 | cut -d":" -f2 | sed -n 's|^ "\([^\"]*\)".*|\1|p'
+ emr describe-cluster --cluster-id $FLOW_ID  --query [Cluster.Name,Cluster.MasterPublicDnsName,Cluster.Status.State,Cluster.Status.StateChangeReason.Message]
 }
 
 function emrterminate {
  FLOW_ID=`flowid $1`
- emr -j $FLOW_ID --terminate
+ emr terminate-clusters --cluster-ids $FLOW_ID
  export EMR_FLOW_ID=""
 }
 
