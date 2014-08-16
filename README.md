@@ -9,18 +9,18 @@ This work is licensed under a [Creative Commons Attribution 3.0 Unported License
 Install
 -----
 
-You must install the [Elastic MapReduce Ruby client](http://aws.amazon.com/code/Elastic-MapReduce/2264).
+You must install the [AWS Command Line Interface](http://aws.amazon.com/cli/).
 
-You then must set the __EMR_HOME__ environment variable to the 
+You then must setup a credentials file with your default emrsettings and configure your EMR_HOME to the directory that hosts that 
 ruby client install root directory.
 
-    export EMR_HOME=/path/to/elastic-mapreduce-ruby
+    export EMR_HOME=/path/to/credentialsFileFolder
 
 Finally, you must source the `setenv.sh` file
 
     . setenv.sh
 
-Setting __EMR_CRED_JSON__ will allow you to override the `credentials.json` file required by the elastic-mapreduce-ruby client.
+Setting __EMR_CRED_JSON__ will allow you to override the `credentials.json` file .
 
 Usage
 -----
