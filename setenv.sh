@@ -97,7 +97,11 @@ function emrproxy {
 }
 
 function emrlist {
- emr --list
+ local opts=""
+ if [[ $* != *-v* ]]; then
+  opts="$opts --no-steps --active"
+ fi
+ emr --list $opts
 }
 
 function emrstat {
