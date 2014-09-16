@@ -110,7 +110,9 @@ function emrstat {
 }
 
 function emrterminate {
+ if [ "$1" == -f ]; then f=1; shift; fi
  FLOW_ID=`flowid $1`
+ [ -n "$f" ] && emr -j $FLOW_ID --set-termination-protection false
  emr -j $FLOW_ID --terminate
  export EMR_FLOW_ID=""
 }
