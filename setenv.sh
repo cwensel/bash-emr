@@ -20,6 +20,13 @@ export EMR_SSH_OPTS="-i "$EMR_SSH_KEY" -o StrictHostKeyChecking=no -o ServerAliv
 
 export ELASTIC_MAPREDUCE_CREDENTIALS=$EMR_CRED_JSON
 
+function __emr_completion() {
+  [ -z "$__EMR_JOBFLOW_LIST" ] && return 0
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  COMPREPLY=( `compgen -W "${__EMR_JOBFLOW_LIST}" -- ${cur}` )
+  return 0
+}
+
 function emr {
   RESULT=`elastic-mapreduce $*`
   ID=`echo "$RESULT" | head -1 | sed -n 's|^Cr.*\(j-[^ ]*\)$|\1|p'`
@@ -36,6 +43,7 @@ function emrset {
     export EMR_FLOW_ID=$1
   fi
 }
+complete -o nospace -F __emr_completion emrset
 
 function flowid {
   if [ -z "$EMR_FLOW_ID" ]; then
@@ -59,11 +67,13 @@ function emrhost {
   done
   echo $H
 }
+complete -o nospace -F __emr_completion emrhost
 
 function emrscreen {
  HOST=`emrhost $1`
  ssh $EMR_SSH_OPTS -t "hadoop@$HOST" 'screen -s -$SHELL -D -R'
 }
+complete -o nospace -F __emr_completion emrscreen
 
 function emrtail {
   if [ -z "$1" ]; then
@@ -83,31 +93,37 @@ function emrtail {
   HOST=`emrhost $HH`
   ssh $EMR_SSH_OPTS -t "hadoop@$HOST" "tail -100f /mnt/var/log/hadoop/steps/$STEP/syslog"
 }
+complete -o nospace -F __emr_completion emrtail
 
 function emrlogin {
  HOST=`emrhost $1`
  ssh $EMR_SSH_OPTS "hadoop@$HOST"
 }
- 
+complete -o nospace -F __emr_completion emrlogin
+
 function emrproxy {
  HOST=`emrhost $1`
  echo "JobTracker: http://$HOST:9100"
  echo "NameNode  : http://$HOST:9101"
  ssh $EMR_SSH_OPTS -D 6666 -N "hadoop@$HOST"
 }
+complete -o nospace -F __emr_completion emrproxy
 
 function emrlist {
  local opts=""
  if [[ $* != *-v* ]]; then
   opts="$opts --no-steps --active"
  fi
- emr --list $opts
+ local list=`emr --list $opts`
+ echo "$list"
+ export __EMR_JOBFLOW_LIST=`echo "$list" | grep '^j-' | sed  -n 's|^\(j-[^ ]*\).*$|\1|p'`
 }
 
 function emrstat {
  FLOW_ID=`flowid $1`
  emr -j $FLOW_ID --describe | grep 'LastStateChangeReason' | sort -r | head -1 | cut -d":" -f2 | sed -n 's|^ "\([^\"]*\)".*|\1|p'
 }
+complete -o nospace -F __emr_completion emrstat
 
 function emrterminate {
  if [ "$1" == -f ]; then f=1; shift; fi
@@ -116,6 +132,7 @@ function emrterminate {
  emr -j $FLOW_ID --terminate
  export EMR_FLOW_ID=""
 }
+complete -o nospace -F __emr_completion emrterminate
 
 function emrscp {
  HOST=`emrhost`
@@ -138,6 +155,3 @@ function emrconf {
   HOST=`emrhost $HH`
   scp $EMR_SSH_OPTS "hadoop@$HOST:conf/*-site.xml" $CONFPATH/
 }
-
-
-
