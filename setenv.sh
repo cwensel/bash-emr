@@ -8,8 +8,7 @@ export PATH=$EMR_HOME:$PATH
 
 if [ ! -f $EMR_CRED_JSON ];then
   echo "Credentias at $EMR_CRED_JSON do not exist!"
-else
-  echo "Using EMR credentials: $EMR_CRED_JSON"
+  return 1
 fi
 
 # EMR helpers
