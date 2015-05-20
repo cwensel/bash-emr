@@ -11,16 +11,16 @@ Install
 
 You must install the [AWS Command Line Interface](http://aws.amazon.com/cli/).
 
-You then must setup a credentials file with your default emrsettings and configure your EMR_HOME to the directory that hosts that 
-ruby client install root directory.
+You then must setup an emr_defaults.json file with your default emrsettings. Use the emr_defaults_sample.json as a starting point.
 
-    export EMR_HOME=/path/to/credentialsFileFolder
+    export EMR_DEFAULTS_JSON=/<mypath>/bash-emr/bash-emr/emr_defaults.json
 
-Finally, you must source the `setenv.sh` file
+    . /<mypath>/bash-emr/setenv.sh
+
+Finally, you must source the `setenv.sh` file (in your .bash_profile)
 
     . setenv.sh
 
-Setting __EMR_CRED_JSON__ will allow you to override the `credentials.json` file .
 
 Usage
 -----
@@ -45,7 +45,7 @@ To remotely login with just the ip address:
 
 	emrlogin <ip address>	
 
-Note that most commands will take the _flow id_ or an _ip address_ to override the default _flow id_ set using `emrset`.
+Note that most commands will take the _cluster id_ or an _ip address_ to override the default _cluster id_ set using `emrset`.
 
 Reference
 ---------
@@ -64,7 +64,10 @@ Use __emrset__ to set the flow id for use by many of the other commands
 Calling __emrset__ without the id returns the current flow id.
 
 ### emrlist
-Will return all job flows created in the last 2 days
+Will return the list of recent clusters
+
+### emractive
+Will return the list of clusters that in an active state
 
 ### emrhost
 Will return the current master node on the EMR cluster.
@@ -101,6 +104,11 @@ Will scp a given file to the remote master node.
 
 This is useful if you leave your EMR cluster running and want to manually spawn 
 jobs from __emrlogin__ or __emrscreen__.
+
+### emrscplocal
+Will copy the given file or folder from the remote master node to a local path 
+
+    emrscplocal file.on.master.txt ~/myfolder/
 
 ### emrconf
 Will scp all `conf/*-site.xml` files from the master node into the given directory.

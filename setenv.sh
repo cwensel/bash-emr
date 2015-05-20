@@ -1,25 +1,23 @@
 #
 # you must have the AWS Universal CLI installed
-# you must set EMR_HOME to point to the directory that has your credentials file
+# you must set EMR_DEFAULTS_JSON to point to the emr_defaults.json file.
 #
-export PATH=$EMR_HOME:$PATH
+
 export AWS_DEFAULT_OUTPUT="table"
 
-[ -z "$EMR_CRED_JSON" ] && EMR_CRED_JSON=$EMR_HOME/credentials.json
+[ -z "$EMR_DEFAULTS_JSON" ]
 
-if [ ! -f $EMR_CRED_JSON ];then
-  echo "Credentias at $EMR_CRED_JSON do not exist!"
+if [ ! -f $EMR_DEFAULTS_JSON ];then
+  echo "Defaults at $EMR_DEFAULTS_JSON does not exist!"
 else
-  echo "Using EMR credentials: $EMR_CRED_JSON"
+  echo "Using EMR defaults: $EMR_DEFAULTS_JSON"
 fi
 
 # EMR helpers
-export EMR_SSH_KEY=`cat $EMR_CRED_JSON | grep '"key-pair-file"' | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
-export EMR_SSH_KEY_NAME=`cat $EMR_CRED_JSON | grep '"key-pair"' | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+export EMR_SSH_KEY=`cat $EMR_DEFAULTS_JSON | grep '"key-pair-file"' | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+export EMR_SSH_KEY_NAME=`cat $EMR_DEFAULTS_JSON | grep '"key-name"' | cut -d':' -f2 | sed -n 's|.*"\([^"]*\)".*|\1|p'`
 
 export EMR_SSH_OPTS="-i "$EMR_SSH_KEY" -o StrictHostKeyChecking=no -o ServerAliveInterval=30"
-
-export ELASTIC_MAPREDUCE_CREDENTIALS=$EMR_CRED_JSON
 
 function __emr_completion() {
   [ -z "$__EMR_JOBFLOW_LIST" ] && return 0
@@ -106,28 +104,19 @@ function emrproxy {
  HOST=`emrhost $1`
  echo "ResourceManager: http://$HOST:9026"
  echo "NameNode  : http://$HOST:9101"
- echo "HUE  : http://$HOST:8080"
+ echo "HUE  : http://$HOST:8888"
  echo "PRESTO  : http://$HOST:8888"
+ echo "EMR Metrics  : http://$HOST:8327"
  ssh $EMR_SSH_OPTS -D 6666 -N "hadoop@$HOST"
 }
 complete -o nospace -F __emr_completion emrproxy
 
 function emrlist {
-<<<<<<< HEAD
- local opts=""
- if [[ $* != *-v* ]]; then
-  opts="$opts --no-steps --active"
- fi
- local list=`emr --list $opts`
- echo "$list"
- export __EMR_JOBFLOW_LIST=`echo "$list" | grep '^j-' | sed  -n 's|^\(j-[^ ]*\).*$|\1|p'`
-=======
  emr list-clusters --query Clusters[*].[Id,Name,Status.State]
 }
 
 function emractive {
  emr list-clusters --query Clusters[*].[Id,Name,Status.State] --active
->>>>>>> 06f2bf6... Updating to work with the Command Line Interface [http://aws.amazon.com/cli/]
 }
 
 function emrstat {
@@ -146,7 +135,12 @@ complete -o nospace -F __emr_completion emrterminate
 
 function emrscp {
  HOST=`emrhost`
- scp $EMR_SSH_OPTS $1 "hadoop@$HOST:"
+ scp $EMR_SSH_OPTS -r $1 "hadoop@$HOST:"
+}
+
+function emrscplocal {
+ HOST=`emrhost`
+ scp $EMR_SSH_OPTS -r "hadoop@$HOST:"$1 $2
 }
 
 function emrconf {
