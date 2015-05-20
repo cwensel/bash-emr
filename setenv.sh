@@ -1,8 +1,9 @@
-
-# 
-# you must set EMR_HOME to point to the root directory of your 'elastic-mapreduce-ruby' install
+#
+# you must have the AWS Universal CLI installed
+# you must set EMR_HOME to point to the directory that has your credentials file
 #
 export PATH=$EMR_HOME:$PATH
+export AWS_DEFAULT_OUTPUT="table"
 
 [ -z "$EMR_CRED_JSON" ] && EMR_CRED_JSON=$EMR_HOME/credentials.json
 
@@ -28,11 +29,11 @@ function __emr_completion() {
 }
 
 function emr {
-  RESULT=`elastic-mapreduce $*`
+  RESULT=`aws emr $*`
   ID=`echo "$RESULT" | head -1 | sed -n 's|^Cr.*\(j-[^ ]*\)$|\1|p'`
-  
+
   [ -n "$ID" ] && export EMR_FLOW_ID="$ID"
-  
+
   echo "$RESULT"
 }
 
@@ -58,11 +59,11 @@ function emrhost {
    echo $1
    return
   fi
-    
+
   FLOW_ID=`flowid $1`
   unset H
   while [ -z "$H" ]; do
-   H=`emr -j $FLOW_ID --describe | grep MasterPublicDnsName | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+   H=`emr describe-cluster --cluster-id $FLOW_ID  --query [Cluster.MasterPublicDnsName] --output text`
    sleep 5
   done
   echo $H
@@ -82,14 +83,14 @@ function emrtail {
     ssh $EMR_SSH_OPTS -t "hadoop@$HOST" "ls -1 /mnt/var/log/hadoop/steps/"
     return
   fi
-      
+
   if [ $# == 2 ]; then
     HH=$1
     STEP=$2
   else
     HH=""
     STEP=$1
-  fi   
+  fi
   HOST=`emrhost $HH`
   ssh $EMR_SSH_OPTS -t "hadoop@$HOST" "tail -100f /mnt/var/log/hadoop/steps/$STEP/syslog"
 }
@@ -103,14 +104,16 @@ complete -o nospace -F __emr_completion emrlogin
 
 function emrproxy {
  HOST=`emrhost $1`
- #echo "JobTracker: http://$HOST:9100"
  echo "ResourceManager: http://$HOST:9026"
- echo "NameNode       : http://$HOST:9101"
+ echo "NameNode  : http://$HOST:9101"
+ echo "HUE  : http://$HOST:8080"
+ echo "PRESTO  : http://$HOST:8888"
  ssh $EMR_SSH_OPTS -D 6666 -N "hadoop@$HOST"
 }
 complete -o nospace -F __emr_completion emrproxy
 
 function emrlist {
+<<<<<<< HEAD
  local opts=""
  if [[ $* != *-v* ]]; then
   opts="$opts --no-steps --active"
@@ -118,19 +121,25 @@ function emrlist {
  local list=`emr --list $opts`
  echo "$list"
  export __EMR_JOBFLOW_LIST=`echo "$list" | grep '^j-' | sed  -n 's|^\(j-[^ ]*\).*$|\1|p'`
+=======
+ emr list-clusters --query Clusters[*].[Id,Name,Status.State]
+}
+
+function emractive {
+ emr list-clusters --query Clusters[*].[Id,Name,Status.State] --active
+>>>>>>> 06f2bf6... Updating to work with the Command Line Interface [http://aws.amazon.com/cli/]
 }
 
 function emrstat {
  FLOW_ID=`flowid $1`
- emr -j $FLOW_ID --describe | grep 'LastStateChangeReason' | sort -r | head -1 | cut -d":" -f2 | sed -n 's|^ "\([^\"]*\)".*|\1|p'
+ emr describe-cluster --cluster-id $FLOW_ID  --query [Cluster.Name,Cluster.MasterPublicDnsName,Cluster.Status.State,Cluster.Status.StateChangeReason.Message]
 }
 complete -o nospace -F __emr_completion emrstat
 
 function emrterminate {
  if [ "$1" == -f ]; then f=1; shift; fi
  FLOW_ID=`flowid $1`
- [ -n "$f" ] && emr -j $FLOW_ID --set-termination-protection false
- emr -j $FLOW_ID --terminate
+ emr terminate-clusters --cluster-ids $FLOW_ID
  export EMR_FLOW_ID=""
 }
 complete -o nospace -F __emr_completion emrterminate
@@ -145,14 +154,14 @@ function emrconf {
     echo "Must provide target directory to place files!"
     return
   fi
-      
+
   if [ $# == 2 ]; then
     HH=$1
     CONFPATH=$2
   else
     HH=""
     CONFPATH=$1
-  fi   
+  fi
   HOST=`emrhost $HH`
   scp $EMR_SSH_OPTS "hadoop@$HOST:conf/*-site.xml" $CONFPATH/
 }
