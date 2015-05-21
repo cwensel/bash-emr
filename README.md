@@ -73,10 +73,15 @@ Will return the list of recent clusters.
 Will return the list of clusters that in an active state.
 
 ### emrhost
-Will return the current master node on the EMR cluster.
+Will return the current master node DNS name on the EMR cluster.
 
-### emrhost-priv
-Will return the current the private ip of the master node on the EMR cluster.
+If 'priv' is given, will return the current the private ip of the master node
+on the EMR cluster.
+
+    emrhost priv
+
+Passing 'priv' to other commands that do a host lookup will force them to
+attach via the private ip.
 
 ### emrlogin
 Will remotely login to the master node.
@@ -103,9 +108,10 @@ Will create a local SOCKS proxy to the master node. This is useful for accessing
 the JobTracker and NameNode. You must install FoxyProxy in FireFox for this to
 work best.
 
-### emrvpc
-Will print urls for possible EMR services based on the private ip of the
-master node.
+### emrprint
+Will print urls for possible EMR services on the master node.
+
+Passing 'priv' as an argument will create urls using the private ips.
 
 ### emrscp
 Will scp a given file to the remote master node.

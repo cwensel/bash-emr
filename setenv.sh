@@ -58,34 +58,29 @@ function emrhost {
    return
   fi
 
+  local PRIV=""
+  if [ "$1" = "priv" ]; then
+    PRIV="true"
+    shift 1
+  fi
+
   FLOW_ID=`flowid $1`
+
   unset H
   while [ -z "$H" ]; do
-   H=`emr describe-cluster --cluster-id $FLOW_ID  --query [Cluster.MasterPublicDnsName] --output text`
+   if [ "$PRIV" = "true" ]; then
+     H=`emr list-instances --cluster-id $FLOW_ID --instance-group-types MASTER --output json | grep PrivateIpAddress | sed -n -e 's|.*\"\([^\"]*\)\".*|\1|p'`
+   else
+     H=`emr describe-cluster --cluster-id $FLOW_ID --query [Cluster.MasterPublicDnsName] --output text`
+   fi
    sleep 5
   done
   echo $H
 }
 complete -o nospace -F __emr_completion emrhost
 
-function emrhost-priv {
-  if [[ $1 =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
-   echo $1
-   return
-  fi
-
-  FLOW_ID=`flowid $1`
-  unset H
-  while [ -z "$H" ]; do
-   H=`emr list-instances --cluster-id $FLOW_ID --instance-group-types MASTER --output json | grep PrivateIpAddress | sed -n 's|.*"\([^"]*\)".*|\1|p'`
-   sleep 5
-  done
-  echo $H
-}
-complete -o nospace -F __emr_completion emrhost-priv
-
 function emrscreen {
- HOST=`emrhost $1`
+ HOST=`emrhost $1 $2`
  ssh $EMR_SSH_OPTS -t "hadoop@$HOST" 'screen -s -$SHELL -D -R'
 }
 complete -o nospace -F __emr_completion emrscreen
@@ -111,13 +106,13 @@ function emrtail {
 complete -o nospace -F __emr_completion emrtail
 
 function emrlogin {
- HOST=`emrhost $1`
+ HOST=`emrhost $1 $2`
  ssh $EMR_SSH_OPTS "hadoop@$HOST"
 }
 complete -o nospace -F __emr_completion emrlogin
 
 function emrproxy {
- HOST=`emrhost $1`
+ HOST=`emrhost $1 $2`
  echo "ResourceManager: http://$HOST:9026"
  echo "NameNode       : http://$HOST:9101"
  echo "HUE            : http://$HOST:8888"
@@ -128,8 +123,8 @@ function emrproxy {
 }
 complete -o nospace -F __emr_completion emrproxy
 
-function emrvpc {
- HOST=`emrhost-priv $1`
+function emrprint {
+ HOST=`emrhost $1 $2`
  echo "ResourceManager: http://$HOST:9026"
  echo "NameNode       : http://$HOST:9101"
  echo "HUE            : http://$HOST:8888"
@@ -137,7 +132,7 @@ function emrvpc {
  echo "EMR Metrics    : http://$HOST:8327"
  echo "Ganglia        : http://$HOST/ganglia/"
 }
-complete -o nospace -F __emr_completion emrvpc
+complete -o nospace -F __emr_completion emrprint
 
 function emrlist {
  local list=`emr list-clusters --query Clusters[*].[Id,Name,Status.State]`
