@@ -5,9 +5,9 @@
 
 export AWS_DEFAULT_OUTPUT="table"
 
-[ -z "$EMR_DEFAULTS_JSON" ]
-
-if [ ! -f $EMR_DEFAULTS_JSON ];then
+if [ -z "$EMR_DEFAULTS_JSON" ];then
+  echo '$EMR_DEFAULTS_JSON has not been set!'
+elif [ ! -f $EMR_DEFAULTS_JSON ];then
   echo "Defaults at $EMR_DEFAULTS_JSON does not exist!"
 else
   echo "Using EMR defaults: $EMR_DEFAULTS_JSON"
@@ -68,6 +68,22 @@ function emrhost {
 }
 complete -o nospace -F __emr_completion emrhost
 
+function emrhost-priv {
+  if [[ $1 =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
+   echo $1
+   return
+  fi
+
+  FLOW_ID=`flowid $1`
+  unset H
+  while [ -z "$H" ]; do
+   H=`emr list-instances --cluster-id $FLOW_ID --instance-group-types MASTER --output json | grep PrivateIpAddress | sed -n 's|.*"\([^"]*\)".*|\1|p'`
+   sleep 5
+  done
+  echo $H
+}
+complete -o nospace -F __emr_completion emrhost-priv
+
 function emrscreen {
  HOST=`emrhost $1`
  ssh $EMR_SSH_OPTS -t "hadoop@$HOST" 'screen -s -$SHELL -D -R'
@@ -103,20 +119,40 @@ complete -o nospace -F __emr_completion emrlogin
 function emrproxy {
  HOST=`emrhost $1`
  echo "ResourceManager: http://$HOST:9026"
- echo "NameNode  : http://$HOST:9101"
- echo "HUE  : http://$HOST:8888"
- echo "PRESTO  : http://$HOST:8888"
- echo "EMR Metrics  : http://$HOST:8327"
+ echo "NameNode       : http://$HOST:9101"
+ echo "HUE            : http://$HOST:8888"
+ echo "PRESTO         : http://$HOST:8888"
+ echo "EMR Metrics    : http://$HOST:8327"
+ echo "Ganglia        : http://$HOST/ganglia/"
  ssh $EMR_SSH_OPTS -D 6666 -N "hadoop@$HOST"
 }
 complete -o nospace -F __emr_completion emrproxy
 
+function emrvpc {
+ HOST=`emrhost-priv $1`
+ echo "ResourceManager: http://$HOST:9026"
+ echo "NameNode       : http://$HOST:9101"
+ echo "HUE            : http://$HOST:8888"
+ echo "PRESTO         : http://$HOST:8888"
+ echo "EMR Metrics    : http://$HOST:8327"
+ echo "Ganglia        : http://$HOST/ganglia/"
+}
+complete -o nospace -F __emr_completion emrvpc
+
 function emrlist {
- emr list-clusters --query Clusters[*].[Id,Name,Status.State]
+ local list=`emr list-clusters --query Clusters[*].[Id,Name,Status.State]`
+
+ echo "$list"
+
+ export __EMR_JOBFLOW_LIST=`echo "$list" | grep 'j-' | sed  -n 's|.*\(j-[^ |]*\).*$|\1|p'`
 }
 
 function emractive {
- emr list-clusters --query Clusters[*].[Id,Name,Status.State] --active
+  local list=`emr list-clusters --query Clusters[*].[Id,Name,Status.State] --active`
+
+ echo "$list"
+
+ export __EMR_JOBFLOW_LIST=`echo "$list" | grep 'j-' | sed  -n 's|.*\(j-[^ |]*\).*$|\1|p'`
 }
 
 function emrstat {
