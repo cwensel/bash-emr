@@ -58,7 +58,7 @@ function emrhost {
    return
   fi
 
-  local PRIV=""
+  local PRIV="${EMR_PRIVATE_IPS}"
   if [ "$1" = "priv" ]; then
     PRIV="true"
     shift 1
@@ -165,12 +165,14 @@ function emrterminate {
 complete -o nospace -F __emr_completion emrterminate
 
 function emrscp {
- HOST=`emrhost`
+ HOST=`emrhost $1 $2`
+ [ "$#" -gt 1 ] && shift `(( "$#" - 1 ))`
  scp $EMR_SSH_OPTS -r $1 "hadoop@$HOST:"
 }
 
 function emrscplocal {
- HOST=`emrhost`
+ HOST=`emrhost $1 $2`
+ [ "$#" -gt 2 ] && shift `(( "$#" - 2 ))`
  scp $EMR_SSH_OPTS -r "hadoop@$HOST:"$1 $2
 }
 

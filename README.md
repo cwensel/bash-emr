@@ -83,6 +83,8 @@ on the EMR cluster.
 Passing 'priv' to other commands that do a host lookup will force them to
 attach via the private ip.
 
+Setting 'EMR_PRIVATE_IPS' to true, will force all commands to use private ips.
+
 ### emrlogin
 Will remotely login to the master node.
 
