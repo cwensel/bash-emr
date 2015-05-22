@@ -35,6 +35,14 @@ function emr {
   echo "$RESULT"
 }
 
+function emrprivip {
+  if [ -z "$EMR_PRIVATE_IPS" ]; then
+    EMR_PRIVATE_IPS='true'
+  else
+    unset EMR_PRIVATE_IPS
+  fi
+}
+
 function emrset {
   if [ -z "$1" ]; then
     echo $EMR_FLOW_ID

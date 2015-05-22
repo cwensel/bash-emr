@@ -66,6 +66,10 @@ Use __emrset__ to set the flow id for use by many of the other commands
 
 Calling __emrset__ without the id returns the current flow id.
 
+### emrprivip
+Will toggle use of private ips vs public domain names. Simply set or unsets
+the env var 'EMR_PRIVATE_IPS'.
+
 ### emrlist
 Will return the list of recent clusters.
 
