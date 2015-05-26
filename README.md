@@ -12,40 +12,43 @@ Install
 
 You must install the [AWS Command Line Interface](http://aws.amazon.com/cli/).
 
-You then must setup an emr_defaults.json file with your default emrsettings. Use
-the emr_defaults_sample.json as a starting point.
+You then must setup an emr_defaults.json file with your default emr settings.
+
+Either call:
+
+    aws configure set key-name <your key name> [--profile <profile-name>]
+    aws configure set key-pair-file <path to private key>  [--profile <profile-name>]
+
+Or, use the emr_defaults_sample.json as a starting point:
 
     export EMR_DEFAULTS_JSON=/<mypath>/bash-emr/bash-emr/emr_defaults.json
 
-    . /<mypath>/bash-emr/setenv.sh
-
 Finally, you must source the `setenv.sh` file (in your .bash_profile)
 
-    . setenv.sh
-
+. /<mypath>/bash-emr/setenv.sh
 
 Usage
 -----
 
 To find an existing cluster:
 
-	emrlist
+  emrlist
 
 To attach to a cluster, using a _flow id_:
 
-    emrset <flow id>
+  emrset <flow id>
 
 To get the current _flow id_:
 
-	emrset
+  emrset
 
 To remotely login to the master node of the current _flow id_:
 
-	emrlogin
+  emrlogin
 
 To remotely login with just the ip address:
 
-	emrlogin <ip address>
+  emrlogin <ip address>
 
 Note that most commands will take the _cluster id_ or an _ip address_ to
 override the default _cluster id_ set using `emrset`.
@@ -65,6 +68,14 @@ Use __emrset__ to set the flow id for use by many of the other commands
     emrset <flow id>
 
 Calling __emrset__ without the id returns the current flow id.
+
+### emrprofile
+Will set the current default profile for the aws cli to use, effectively
+changing the keys and credential to be use used on subsequent commands.
+
+Will also set 'AWS_DEFAULT_PROFILE', or unset if there is no profile name
+given.
+
 
 ### emrprivip
 Will toggle use of private ips vs public domain names. Simply set or unsets

@@ -1,5 +1,4 @@
 {
   "key-name":      “<name of your EC2 keypair>”,
   "key-pair-file": “/path/to/my/ec2/keypair/pem/file”,
-  "log-uri":       "s3://<mybucket>/logs/"
 }

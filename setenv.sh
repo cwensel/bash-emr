@@ -6,7 +6,7 @@
 export AWS_DEFAULT_OUTPUT="table"
 
 if [ -z "$EMR_DEFAULTS_JSON" ];then
-  echo '$EMR_DEFAULTS_JSON has not been set!'
+  echo 'EMR_DEFAULTS_JSON has not been set, use emrprofile'
 elif [ ! -f $EMR_DEFAULTS_JSON ];then
   echo "Defaults at $EMR_DEFAULTS_JSON does not exist!"
 else
@@ -33,6 +33,20 @@ function emr {
   [ -n "$ID" ] && export EMR_FLOW_ID="$ID"
 
   echo "$RESULT"
+}
+
+function emrprofile {
+
+  if [ -z "$1" ]; then
+    unset AWS_DEFAULT_PROFILE
+    echo "clearing profile, using default"
+  else
+    export AWS_DEFAULT_PROFILE=$1
+    echo "changing profile to: $1"
+  fi
+  export EMR_SSH_KEY=`aws configure get key-pair-file`
+  export EMR_SSH_KEY_NAME=`aws configure get key-name`
+  export EMR_SSH_OPTS="-i "$EMR_SSH_KEY" -o StrictHostKeyChecking=no -o ServerAliveInterval=30"
 }
 
 function emrprivip {
