@@ -103,9 +103,16 @@ complete -o nospace -F __emr_completion emrhost
 
 function emrscreen {
  HOST=`emrhost $1 $2`
- ssh $EMR_SSH_OPTS -t "hadoop@$HOST" 'screen -s -$SHELL -D -R'
+ SELF=${EMR_SCREEN_NAME:-$USER}
+ ssh $EMR_SSH_OPTS -t "hadoop@$HOST" 'screen -s -$SHELL -D -R -S '"$SELF"''
 }
 complete -o nospace -F __emr_completion emrscreen
+
+function emrscreenlist {
+ HOST=`emrhost $1 $2`
+ ssh $EMR_SSH_OPTS -t "hadoop@$HOST" 'screen -list'
+}
+complete -o nospace -F __emr_completion emrscreenlist
 
 function emrtail {
   if [ -z "$1" ]; then

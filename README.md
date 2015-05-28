@@ -113,6 +113,12 @@ Will terminate your remote EMR cluster.
 Will launch screen on the master node. Screen must be already installed.
 If a screen instance is already running, this command will automatically attach.
 
+Note screens will be named after the local username, or use the
+`EMR_SCREEN_NAME` env variable.
+
+### emrscreenlist
+Will list all remove screen names.
+
 ### emrtail
 Will automatically 'tail' the current flow step logs.
 
