@@ -142,11 +142,12 @@ complete -o nospace -F __emr_completion emrlogin
 
 function emrproxy {
  HOST=`emrhost $1 $2`
- echo "ResourceManager: http://$HOST:9026"
- echo "NameNode       : http://$HOST:9101"
+ echo "ResourceManager: http://$HOST:8088"
+ echo "NameNode       : http://$HOST:50070"
  echo "HUE            : http://$HOST:8888"
- echo "PRESTO         : http://$HOST:8888"
+ #echo "PRESTO         : http://$HOST:8888"
  echo "EMR Metrics    : http://$HOST:8327"
+ echo "Spark History  : http://$HOST:18080"
  echo "Ganglia        : http://$HOST/ganglia/"
  ssh $EMR_SSH_OPTS -D 6666 -N "hadoop@$HOST"
 }
@@ -154,11 +155,12 @@ complete -o nospace -F __emr_completion emrproxy
 
 function emrprint {
  HOST=`emrhost $1 $2`
- echo "ResourceManager: http://$HOST:9026"
- echo "NameNode       : http://$HOST:9101"
+ echo "ResourceManager: http://$HOST:8088"
+ echo "NameNode       : http://$HOST:50070"
  echo "HUE            : http://$HOST:8888"
- echo "PRESTO         : http://$HOST:8888"
+ #echo "PRESTO         : http://$HOST:8888"
  echo "EMR Metrics    : http://$HOST:8327"
+ echo "Spark History  : http://$HOST:18080"
  echo "Ganglia        : http://$HOST/ganglia/"
 }
 complete -o nospace -F __emr_completion emrprint
